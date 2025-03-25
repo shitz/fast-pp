@@ -1,0 +1,21 @@
+[package]
+name = "fast-pp-ebpf"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fast-pp-common = { path = "../fast-pp-common" }
+
+aya-ebpf = { workspace = true }
+aya-log-ebpf = { workspace = true }
+network-types = "0.0.7"
+
+[build-dependencies]
+which = { workspace = true }
+
+[profile.dev]
+panic ="abort"
+
+[[bin]]
+name = "fast-pp"
+path = "src/main.rs"
