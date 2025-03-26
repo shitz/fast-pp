@@ -1,33 +1,50 @@
-# xdp-example
+# Fast packet processing with eBPF (fast-pp)
 
 ## Prerequisites
 
 1. stable rust toolchains: `rustup toolchain install stable`
 1. nightly rust toolchains: `rustup toolchain install nightly --component rust-src`
-1. (if cross-compiling) rustup target: `rustup target add ${ARCH}-unknown-linux-musl`
-1. (if cross-compiling) LLVM: (e.g.) `brew install llvm` (on macOS)
-1. (if cross-compiling) C toolchain: (e.g.) [`brew install filosottile/musl-cross/musl-cross`](https://github.com/FiloSottile/homebrew-musl-cross) (on macOS)
 1. bpf-linker: `cargo install bpf-linker` (`--no-default-features` on macOS)
 
-## Build & Run
+## Build
 
-Use `cargo build`, `cargo check`, etc. as normal. Run your program with:
+Use `cargo build`, `cargo check`, etc. as normal.
 
-```shell
-cargo run --release --config 'target."cfg(all())".runner="sudo -E"'
+Cargo build scripts are used to automatically build the eBPF correctly and
+include it in the program.
+
+## Run
+
+Before running the program, you need to setup a virtual network topology. You
+can use the provided `setup.sh` script to create a network namespace and veth
+pairs.
+
+```sh
+sudo ./setup.sh
 ```
 
-Cargo build scripts are used to automatically build the eBPF correctly and include it in the
-program.
+Then change into the `net2` namespace and run the program.
 
-## Cross-compiling on macOS
-
-Cross compilation should work on both Intel and Apple Silicon Macs.
-
-```shell
-CC=${ARCH}-linux-musl-gcc cargo build --package xdp-example --release \
-  --target=${ARCH}-unknown-linux-musl \
-  --config=target.${ARCH}-unknown-linux-musl.linker=\"${ARCH}-linux-musl-gcc\"
+```sh
+sudo ip netns exec net2 bash
+RUST_LOG=debug ./target/debug/fast-pp
 ```
-The cross-compiled program `target/${ARCH}-unknown-linux-musl/release/xdp-example` can be
-copied to a Linux server or VM and run there.
+
+In a separate terminal, you can run the `ping` command to generate some traffic.
+
+```sh
+sudo ip netns exec net1 ping 192.168.10.2
+sudo ip netns exec net1 ping 192.168.20.2
+```
+
+Observe that the pings to `192.168.10.2` are processed by the kernel and pings
+to `192.168.20.2` by `fast-pp`.
+
+## Cleanup
+
+After you are done, you can run the `cleanup.sh` script to remove the network
+namespace and veth pairs.
+
+```sh
+sudo ./cleanup.sh
+```
