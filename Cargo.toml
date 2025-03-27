@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["fast-pp", "fast-pp-common", "fast-pp-ebpf"]
+members = ["af-packet", "fast-pp", "fast-pp-common", "fast-pp-ebpf"]
 default-members = ["fast-pp", "fast-pp-common"]
 
 [workspace.dependencies]

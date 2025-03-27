@@ -1,0 +1,13 @@
+[package]
+name = "af-packet"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "af-packet"
+path = "src/main.rs"
+
+[dependencies]
+ctrlc = "3.4.5"
+etherparse = "0.17.0"
+nix = { version = "0.29.0", features = ["net", "socket"] }
